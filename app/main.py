@@ -1,12 +1,9 @@
-
-
 from fastapi import FastAPI, HTTPException, Depends
-from pydantic import BaseModel
 
 from sqlalchemy.orm import Session
 from starlette import status
 
-from . import models
+from . import models, schemas
 from .database import engine, get_db
 
 models.Base.metadata.create_all(bind=engine)
@@ -14,37 +11,13 @@ models.Base.metadata.create_all(bind=engine)
 app = FastAPI()
 
 
-class MessageScheme(BaseModel):
-    title: str
-    content: str
-
-
-my_messages = [{"title": "Любитель бебр", "content": "О да, я очень люблю капибар", "id": 1},
-               {"title": "Очень круто круто очень", "content": "Ну как бы да, прям вообще зашибись но блин", "id": 2}]
-
-
 @app.get("/sqltest")
 async def bd_test():
-
     return {"status": "conection was successful"}
-
-
-async def find_message_by_id(message_id: int):
-    for message in my_messages:
-        if message["id"] == message_id:
-            return message
-
-
-async def find_index_of_message(message_id: int):
-    for i, message in enumerate(my_messages):
-        if message["id"] == message_id:
-            return i
-
 
 @app.get("/")
 async def root():
     return {"message": "Hi!1!"}
-
 
 @app.get("/messages")  # Get all messages
 async def get_messages(db: Session = Depends(get_db)):
@@ -53,7 +26,7 @@ async def get_messages(db: Session = Depends(get_db)):
 
 
 @app.post("/messages", status_code=status.HTTP_201_CREATED)  # Create a message
-async def create_message(message: MessageScheme, db: Session = Depends(get_db)):
+async def create_message(message: schemas.CreateMessage, db: Session = Depends(get_db)):
     new_message = models.Message(**message.dict())
     db.add(new_message)
     db.commit()
@@ -67,26 +40,34 @@ async def get_message(id: int, db: Session = Depends(get_db)):
     message = db.query(models.Message).filter(models.Message.id == id).first()  # type: ignore
     if not message:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"message {id} was not found")
-    return message
+    return {"message": message}
 
 
 @app.put("/messages/{id}")  # Update message
-async def update_message(id: int, update_message: MessageScheme):
-    index = await find_index_of_message(id)
-    print(index)
-    if index is None:
+async def update_message(id: int, update_message: schemas.UpdateMessage, db: Session = Depends(get_db)):
+    message_query = db.query(models.Message).filter(models.Message.id == id)  # type: ignore
+    message = message_query.first()
+
+    if message is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f"message to update with ID: {id} was not found")
-    update_message_dict = update_message.dict()
-    update_message_dict['id'] = id
-    my_messages[index] = update_message_dict
-    return {"message": update_message_dict}
+                            detail=f"message {id} was not found")
+
+    message_query.update(update_message.dict())
+
+    db.commit()
+    db.refresh(message)
+
+    return {"updated_message": message}
 
 
-@app.delete("/messages/{id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_message(id: int):
-    index = await find_index_of_message(id)
-    if not index:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"message {id} doesn't exist")
-    my_messages.pop(index)
-    return {"result": f"message {id} was deleted"}
+@app.delete("/messages/{id}", status_code=status.HTTP_204_NO_CONTENT, )
+async def delete_message(id: int, db: Session = Depends(get_db)):
+    message_to_delete = db.query(models.Message).filter(models.Message.id == id)  # type: ignore
+
+    if message_to_delete.first() is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f"message with ID {id} was not find")
+    message_to_delete.delete(synchronize_session=False)
+    db.commit()
+
+# 5:38:36
