@@ -1,6 +1,6 @@
 
 
-from fastapi import FastAPI, Response, HTTPException, Depends
+from fastapi import FastAPI, HTTPException, Depends
 from pydantic import BaseModel
 
 from sqlalchemy.orm import Session
@@ -54,7 +54,7 @@ async def get_messages(db: Session = Depends(get_db)):
 
 @app.post("/messages", status_code=status.HTTP_201_CREATED)  # Create a message
 async def create_message(message: MessageScheme, db: Session = Depends(get_db)):
-    new_message = models.Message(**MessageScheme.dict())
+    new_message = models.Message(**message.dict())
     db.add(new_message)
     db.commit()
     db.refresh(new_message)
@@ -64,7 +64,7 @@ async def create_message(message: MessageScheme, db: Session = Depends(get_db)):
 
 @app.get("/messages/{id}")  # Get one message
 async def get_message(id: int, db: Session = Depends(get_db)):
-    message = db.query(models.Message).filter(models.Message.id == id).first()
+    message = db.query(models.Message).filter(models.Message.id == id).first()  # type: ignore
     if not message:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"message {id} was not found")
     return message
