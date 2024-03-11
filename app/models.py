@@ -11,8 +11,9 @@ class User(Base):
 
     id = Column(Integer, primary_key=True, nullable=False)
     username = Column(String, nullable=False)
-    hashed_password = Column(String, nullable=False)
+    password = Column(String, nullable=False)
     email = Column(String, unique=True, index=True)
+    created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
 
 
 class Message(Base):
@@ -21,4 +22,5 @@ class Message(Base):
     id = Column(Integer, primary_key=True, nullable=False)
     title = Column(String, server_default="Название записки")
     content = Column(String, nullable=False)
-    created_at = Column(TIMESTAMP(timezone=True), nullable = False, server_default=text('now()'))
+    created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
+
