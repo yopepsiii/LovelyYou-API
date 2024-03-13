@@ -1,10 +1,6 @@
 from fastapi import FastAPI
-from fastapi.responses import HTMLResponse
-from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
-from starlette.requests import Request
 
-from .routers import messages, users
+from .routers import messages, users, auth
 
 from . import models
 from .database import engine
@@ -15,8 +11,8 @@ app = FastAPI()
 
 app.include_router(messages.router)
 app.include_router(users.router)
+app.include_router(auth.router)
 
-templates = Jinja2Templates(directory="templates")
 
 @app.get("/sqltest")
 async def bd_test():

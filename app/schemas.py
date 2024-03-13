@@ -39,6 +39,11 @@ class UserUpdate(UserBase):
     pass
 
 
+class UserLogin(BaseModel):
+    email: str
+    password: str
+
+
 class UserOut(BaseModel):
     username: str
     id: int
