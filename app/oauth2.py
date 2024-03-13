@@ -9,7 +9,7 @@ from app import schemas
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
-SECRET_KEY = '59gkrEkhgk5078gjfnbvfkg84mfdFKGFGK20IF'
+SECRET_KEY = '59gkrEkhgk5078gjfnbvfkg84mfdFKGFGK20IF'  # Буквально любой текст
 ALGORITHM = 'HS256'
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
@@ -17,10 +17,10 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 async def create_access_token(data: dict):
     to_encode = data.copy()
     expire = datetime.now(tz=UTC) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    to_encode.update({'exp': expire})
+    to_encode.update({'exp': expire}) # Добавляем новое значение времени исчезновения token
     jwt.expires_at = expire
 
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)  # Шифруем токен с помощью указанного алгоритма и по секретному ключу
     return encoded_jwt
 
 
@@ -42,5 +42,5 @@ async def verify_token(token: str, credentials_exception):
 async def get_current_user(token: str = Depends(oauth2_scheme)):
     credentials_exception = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                                           detail="Could not validate credentials",
-                                          headers={"WWW-Authenticate": "Bearer"})
+                                          headers={"WWW-Authenticate": "Bearer"})  # Создаем описание ошибки для неправильного токена
     return await verify_token(token, credentials_exception)
