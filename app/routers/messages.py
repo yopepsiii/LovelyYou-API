@@ -4,6 +4,7 @@ from starlette import status
 
 from app import schemas, models
 from app.database import get_db
+from .. import oauth2
 
 router = APIRouter(tags=["messages"])
 
@@ -15,7 +16,8 @@ async def get_messages(db: Session = Depends(get_db)):
 
 
 @router.post("/messages", status_code=status.HTTP_201_CREATED, response_model=schemas.Message)  # Create a message
-async def create_message(message: schemas.MessageCreate, db: Session = Depends(get_db)):
+async def create_message(message: schemas.MessageCreate, db: Session = Depends(get_db), user_id: int = Depends(oauth2.get_current_user)):
+
     new_message = models.Message(**message.dict())
     db.add(new_message)
     db.commit()
@@ -24,8 +26,8 @@ async def create_message(message: schemas.MessageCreate, db: Session = Depends(g
     return new_message
 
 
-@router.get("/messages/{id}", response_model=schemas.Message)  # Get one message
-async def get_message(id: int, db: Session = Depends(get_db)):
+@router.get("/messages/{id}", response_model=schemas.Message, )  # Get one message
+async def get_message(id: int, db: Session = Depends(get_db), user_id: int = Depends(oauth2.get_current_user)):
     message = db.query(models.Message).filter(models.Message.id == id).first()  # type: ignore
     if not message:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"message {id} was not found")
@@ -33,7 +35,7 @@ async def get_message(id: int, db: Session = Depends(get_db)):
 
 
 @router.put("/messages/{id}")  # Update message
-async def update_message(id: int, updated_message: schemas.MessageUpdate, db: Session = Depends(get_db)):
+async def update_message(id: int, updated_message: schemas.MessageUpdate, db: Session = Depends(get_db), user_id: int = Depends(oauth2.get_current_user)):
     message_query = db.query(models.Message).filter(models.Message.id == id)  # type: ignore
     message = message_query.first()
 
@@ -50,7 +52,7 @@ async def update_message(id: int, updated_message: schemas.MessageUpdate, db: Se
 
 
 @router.delete("/messages/{id}", status_code=status.HTTP_204_NO_CONTENT, )
-async def delete_message(id: int, db: Session = Depends(get_db)):
+async def delete_message(id: int, db: Session = Depends(get_db), user_id: int = Depends(oauth2.get_current_user)):
     message_to_delete = db.query(models.Message).filter(models.Message.id == id)  # type: ignore
 
     if message_to_delete.first() is None:
