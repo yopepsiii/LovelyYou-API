@@ -5,18 +5,20 @@ from datetime import datetime, timedelta, UTC
 
 from starlette import status
 
-from .schemas import auth as auth_schemas
+from schemas import auth as auth_schemas
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 SECRET_KEY = '59gkrEkhgk5078gjfnbvfkg84mfdFKGFGK20IF'  # Буквально любой текст
 ALGORITHM = 'HS256'
-ACCESS_TOKEN_EXPIRE_MINUTES = 1
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 
 async def create_access_token(data: dict):
     to_encode = data.copy()
     expire = datetime.now(tz=UTC) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    to_encode.update({'exp': expire}) # Добавляем новое значение времени исчезновения token
+    jwt.expires_at = expire
 
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)  # Шифруем токен с помощью указанного алгоритма и по секретному ключу
     return encoded_jwt
