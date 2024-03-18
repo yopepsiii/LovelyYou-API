@@ -5,6 +5,8 @@ from pydantic import BaseModel
 class MessageBase(BaseModel):
     title: str
     content: str
+    creator_id: int
+    receiver_id: int
 
 
 class MessageCreate(MessageBase):

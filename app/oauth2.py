@@ -4,8 +4,7 @@ from jose import jwt, JWTError
 from datetime import datetime, timedelta, UTC
 
 from starlette import status
-
-from schemas import auth as auth_schemas
+from .schemas import auth as auth_schemas
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 

@@ -23,6 +23,6 @@ class Message(Base):
     title = Column(String, server_default="Название записки")
     content = Column(String, nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
-    creator_id = Column(Integer, nullable=False)
-    receiver_id = Column(Integer, nullable=False)
+    creator_id = Column(Integer, ForeignKey("Users.id", ondelete="CASCADE", onupdate="CASCADE"), nullable=False)
+    receiver_id = Column(Integer, ForeignKey("Users.id", ondelete="CASCADE", onupdate="CASCADE"), nullable=False)
 
