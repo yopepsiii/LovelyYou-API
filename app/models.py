@@ -7,22 +7,33 @@ from .database import Base
 
 
 class User(Base):
-    __tablename__: str = 'Users'
+    __tablename__: str = "Users"
 
     id = Column(Integer, primary_key=True, nullable=False)
     username = Column(String, nullable=False)
     password = Column(String, nullable=False)
     email = Column(String, unique=True, index=True)
-    created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
+    created_at = Column(
+        TIMESTAMP(timezone=True), nullable=False, server_default=text("now()")
+    )
 
 
 class Message(Base):
-    __tablename__: str = 'Messages'
+    __tablename__: str = "Messages"
 
     id = Column(Integer, primary_key=True, nullable=False)
     title = Column(String, server_default="Название записки")
     content = Column(String, nullable=False)
-    created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
-    creator_id = Column(Integer, ForeignKey("Users.id", ondelete="CASCADE", onupdate="CASCADE"), nullable=False)
-    receiver_id = Column(Integer, ForeignKey("Users.id", ondelete="CASCADE", onupdate="CASCADE"), nullable=False)
-
+    created_at = Column(
+        TIMESTAMP(timezone=True), nullable=False, server_default=text("now()")
+    )
+    creator_id = Column(
+        Integer,
+        ForeignKey("Users.id", ondelete="CASCADE", onupdate="CASCADE"),
+        nullable=False,
+    )
+    receiver_id = Column(
+        Integer,
+        ForeignKey("Users.id", ondelete="CASCADE", onupdate="CASCADE"),
+        nullable=False,
+    )

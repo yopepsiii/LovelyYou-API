@@ -5,12 +5,10 @@ from pydantic import BaseModel
 class MessageBase(BaseModel):
     title: str
     content: str
-    creator_id: int
-    receiver_id: int
 
 
 class MessageCreate(MessageBase):
-    pass
+    receiver_id: int
 
 
 class MessageUpdate(MessageBase):
@@ -20,7 +18,8 @@ class MessageUpdate(MessageBase):
 class Message(MessageBase):
     id: int
     created_at: datetime
+    creator_id: int
+    receiver_id: int
 
     class Config:
         from_attributes = True
-

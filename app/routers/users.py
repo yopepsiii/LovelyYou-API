@@ -22,11 +22,15 @@ async def get_users(db: Session = Depends(get_db)):
 async def get_users(id: int, db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.id == id).first()  # type: ignore
     if user is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"user with ID {id} not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=f"user with ID {id} not found"
+        )
     return user
 
 
-@router.post("/", status_code=status.HTTP_201_CREATED, response_model=user_schemas.UserOut)  # Create a message
+@router.post(
+    "/", status_code=status.HTTP_201_CREATED, response_model=user_schemas.UserOut
+)  # Create a message
 async def create_message(user: user_schemas.UserCreate, db: Session = Depends(get_db)):
     user.password = utils.hash(user.password)
     new_user = models.User(**user.dict())

@@ -24,7 +24,4 @@ async def root():
     return {"message": "Hello World"}
 
 
-
-
-
 # 6:26:24
