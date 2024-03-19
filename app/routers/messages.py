@@ -16,21 +16,14 @@ router = APIRouter(tags=["messages"])
     "/messages", response_model=list[message_schemas.Message]
 )  # Get all messages
 async def get_messages(
-        db: Session = Depends(get_db), user: models.User = Depends(oauth2.get_current_user), limit_offset: int = 10, skip: int = 0
+    db: Session = Depends(get_db),
+    user: models.User = Depends(oauth2.get_current_user),
+    limit: int = 10,
+    skip: int = 0,
+    search: Optional[str] = ''
 ):
-    messages = db.query(models.Message).limit(limit_offset).offset(skip).filter()
-    return messages
-
-
-@router.get(
-    "/messages/me", response_model=list[message_schemas.Message]
-)  # Get all messages by user
-async def get_messages_by_me(
-        db: Session = Depends(get_db), user: models.User = Depends(oauth2.get_current_user), limit: int = 20, skip: int = 0, search: Optional[str] = ''
-):
-    messages = db.query(models.Message).limit(limit).offset(skip).filter(models.Message.creator_id == user.id).all()  # type: ignore
-    if messages is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="You don't create any messages")
+    print(search)
+    messages = db.query(models.Message).filter(models.Message.title.contains(search)).limit(limit).offset(skip).all()  # type: ignore
     return messages
 
 
@@ -40,9 +33,9 @@ async def get_messages_by_me(
     response_model=message_schemas.Message,
 )  # Create a message
 async def create_message(
-        message: message_schemas.MessageCreate,
-        db: Session = Depends(get_db),
-        user: models.User = Depends(oauth2.get_current_user),
+    message: message_schemas.MessageCreate,
+    db: Session = Depends(get_db),
+    user: models.User = Depends(oauth2.get_current_user),
 ):
     new_message = models.Message(creator_id=user.id, **message.dict())
     db.add(new_message)
@@ -57,9 +50,9 @@ async def create_message(
     response_model=message_schemas.Message,
 )  # Get one message
 async def get_message(
-        id: int,
-        db: Session = Depends(get_db),
-        user: models.User = Depends(oauth2.get_current_user),
+    id: int,
+    db: Session = Depends(get_db),
+    user: models.User = Depends(oauth2.get_current_user),
 ):
     message = db.query(models.Message).filter(models.Message.id == id).first()  # type: ignore
     if not message:
@@ -71,10 +64,10 @@ async def get_message(
 
 @router.put("/messages/{id}")  # Update message
 async def update_message(
-        id: int,
-        updated_message: message_schemas.MessageUpdate,
-        db: Session = Depends(get_db),
-        user: models.User = Depends(oauth2.get_current_user),
+    id: int,
+    updated_message: message_schemas.MessageUpdate,
+    db: Session = Depends(get_db),
+    user: models.User = Depends(oauth2.get_current_user),
 ):
     message_query = db.query(models.Message).filter(models.Message.id == id)  # type: ignore
     message = message_query.first()
@@ -94,9 +87,9 @@ async def update_message(
 
 @router.delete("/messages/{id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_message(
-        id: int,
-        db: Session = Depends(get_db),
-        user: models.User = Depends(oauth2.get_current_user),
+    id: int,
+    db: Session = Depends(get_db),
+    user: models.User = Depends(oauth2.get_current_user),
 ):
     message_query = db.query(models.Message).filter(models.Message.id == id)  # type: ignore
     message = message_query.first()

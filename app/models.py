@@ -38,5 +38,5 @@ class Message(Base):
         nullable=False,
     )
 
-    creator = relationship('User', foreign_keys=[creator_id])  # type: ignore
-    receiver = relationship('User', foreign_keys=[receiver_id])  # type: ignore
+    creator = relationship("User", foreign_keys=[creator_id])  # type: ignore
+    receiver = relationship("User", foreign_keys=[receiver_id])  # type: ignore
