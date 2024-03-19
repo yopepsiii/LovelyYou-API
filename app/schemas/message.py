@@ -1,5 +1,6 @@
 from datetime import datetime
 from pydantic import BaseModel
+from ..schemas import user as user_schemas
 
 
 class MessageBase(BaseModel):
@@ -18,8 +19,8 @@ class MessageUpdate(MessageBase):
 class Message(MessageBase):
     id: int
     created_at: datetime
-    creator_id: int
-    receiver_id: int
+    creator: user_schemas.UserOut
+    receiver: user_schemas.UserOut
 
     class Config:
         from_attributes = True

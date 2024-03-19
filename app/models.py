@@ -37,3 +37,6 @@ class Message(Base):
         ForeignKey("Users.id", ondelete="CASCADE", onupdate="CASCADE"),
         nullable=False,
     )
+
+    creator = relationship('User', foreign_keys=[creator_id])  # type: ignore
+    receiver = relationship('User', foreign_keys=[receiver_id])  # type: ignore
