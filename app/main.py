@@ -1,6 +1,4 @@
 from fastapi import FastAPI
-
-from config import settings
 from .routers import messages, users, auth
 
 from . import models

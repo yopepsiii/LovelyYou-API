@@ -1,5 +1,3 @@
-from datetime import timedelta
-
 from pydantic_settings import BaseSettings
 
 
@@ -11,7 +9,11 @@ class Settings(BaseSettings):
     database_password: str
     secret_key: str
     algorithm: str
-    access_token_expires_minutes: int
+    access_token_expire_minutes: int
+
+    class Config:
+        env_file = '.venv/.env'
 
 
 settings = Settings()
+
