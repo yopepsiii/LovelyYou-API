@@ -22,8 +22,39 @@ async def get_messages(
     skip: int = 0,
     search: Optional[str] = "",
 ):
-    print(search)
-    messages = db.query(models.Message).filter(models.Message.title.contains(search)).limit(limit).offset(skip).all()  # type: ignore
+    messages = (
+        db.query(models.Message)
+        .filter(
+            (models.Message.title + models.Message.content).contains(search.lower()),
+            models.Message.creator_id == user.id,  # type: ignore
+        )
+        .limit(limit)
+        .offset(skip)
+        .all()
+    )  # type: ignore
+    return messages
+
+
+@router.get(
+    "/messages/me", response_model=list[message_schemas.Message]
+)  # Получаем все сообщения конкретно от авторизированного пользователя
+async def get_messages(
+    db: Session = Depends(get_db),
+    user: models.User = Depends(oauth2.get_current_user),
+    limit: int = 10,
+    skip: int = 0,
+    search: Optional[str] = "",
+):
+    messages = (
+        db.query(models.Message)
+        .filter(
+            (models.Message.title + models.Message.content).contains(search.lower()),
+            models.Message.creator_id == user.id,  # type: ignore
+        )
+        .limit(limit)
+        .offset(skip)
+        .all()
+    )
     return messages
 
 

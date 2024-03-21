@@ -38,3 +38,20 @@ class Message(Base):
 
     creator = relationship("User", foreign_keys=[creator_id])  # type: ignore
     receiver = relationship("User", foreign_keys=[receiver_id])  # type: ignore
+
+
+class Vote(Base):
+    __tablename__ = "Votes"
+
+    user_id = Column(
+        Integer,
+        ForeignKey("Users.id", ondelete="CASCADE", onupdate="CASCADE"),
+        primary_key=True,
+        nullable=False,
+    )
+    message_id = Column(
+        Integer,
+        ForeignKey("Messages.id", ondelete="CASCADE", onupdate="CASCADE"),
+        primary_key=True,
+        nullable=False,
+    )
