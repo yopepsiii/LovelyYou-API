@@ -1,7 +1,7 @@
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
-from datetime import datetime, timedelta, UTC
+from datetime import datetime, timedelta
 
 from starlette import status
 from .schemas import auth as auth_schemas
@@ -17,7 +17,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = settings.access_token_expire_minutes
 
 async def create_access_token(data: dict):
     to_encode = data.copy()
-    expire = datetime.now(tz=UTC) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    expire = datetime.now() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update(
         {"exp": expire}
     )  # Добавляем новое значение времени исчезновения token
