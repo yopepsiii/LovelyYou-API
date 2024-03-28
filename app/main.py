@@ -2,8 +2,6 @@ from fastapi import FastAPI
 from .routers import messages, users, auth
 from fastapi.middleware.cors import CORSMiddleware
 
-
-
 # models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
@@ -15,7 +13,6 @@ origins = [
     'https://localhost:8000',
     'https://www.google.com'
 ]
-
 
 app.add_middleware(
     CORSMiddleware,  # type: ignore
@@ -30,16 +27,6 @@ app.include_router(users.router)
 app.include_router(auth.router)
 
 
-
-
-@app.get("/sqltest")
-async def bd_test():
-    return {"status": "conection was successful"}
-
-
 @app.get("/")
 async def root():
-    return {"message": "Hello World"}
-
-
-# 6:26:24
+    return {"message": "API is listening"}
