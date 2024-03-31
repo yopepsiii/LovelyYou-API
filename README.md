@@ -5,7 +5,7 @@
 # Стэк
 
 Framework - FastAPI 💫
-
+_______
 Реляционная бд - PostgreSQL
 ORM - SQLAlchemy
 Валидация данных - Pydantic
