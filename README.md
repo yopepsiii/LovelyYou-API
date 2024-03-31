@@ -7,7 +7,7 @@
 Framework - FastAPI 💫  
 
 Реляционная бд - PostgreSQL  
-ORM - SQLAlchemy
+ORM - SQLAlchemy  
 Валидация данных - Pydantic  
 
 Кэширование и нереляционная бд - Redis  
