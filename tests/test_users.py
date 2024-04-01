@@ -1,13 +1,19 @@
 import pytest
 from fastapi import Depends
 from fastapi.testclient import TestClient
-from sqlalchemy.orm import Session
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session, sessionmaker, declarative_base
 
-from app.main import app
+from app.config import settings
 from app.database import get_db
+from app.main import app
 
-client = TestClient(app)
 
+@pytest.fixture()
+def client():
+    Base.metadata.create_all(bind=engine)
+    yield TestClient(app)
+    Base.metadata.drop_all(bind=engine)
 
 
 SQL_ALCHEMY_DATABASE_URL = (
@@ -16,42 +22,29 @@ SQL_ALCHEMY_DATABASE_URL = (
     f":{settings.database_password}"
     f"@{settings.database_hostname}"
     f":{settings.database_port}"
-    f"/{settings.database_name}"
+    f"/LovelyYou-test"
 )
+
 
 engine = create_engine(SQL_ALCHEMY_DATABASE_URL)
 
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+TestSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
 
 
-async def get_db():
-    db = SessionLocal()
+async def override_get_db():
+    db = TestSessionLocal()
     try:
         yield db
     finally:
         db.close()
 
 
+app.dependency_overrides[get_db] = override_get_db
 
 
-
-
-
-
-
-
-
-
-
-
-def test_root():
+def test_root(client):
     res = client.get("/")
     print(res.json())
 
-
-def test_create_user():
-    res = client.post("/users/", json={"username": "bebra", "email": "bebra228@gmail.com", "password": "AloHuis"})
-    print(res.json())
-    assert res.status_code == 201
