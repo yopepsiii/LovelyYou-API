@@ -1,28 +1,19 @@
+from fastapi.testclient import TestClient
 import pytest
 from sqlalchemy import create_engine
-from sqlalchemy.orm import declarative_base, sessionmaker
-from starlette.testclient import TestClient
-
-from app import models
-from app.config import settings
-from app.database import get_db
+from sqlalchemy.orm import sessionmaker
 from app.main import app
 
-SQLALCHEMY_DATABASE_URL = (
-    f"postgresql:"
-    f"//{settings.database_username}"
-    f":{settings.database_password}"
-    f"@{settings.database_hostname}"
-    f":{settings.database_port}"
-    f"/{settings.database_name}_test"
-)
+from app.config import settings
+from app.database import get_db
+from app.database import Base
+
+SQLALCHEMY_DATABASE_URL = f'postgresql://{settings.database_username}:{settings.database_password}@{settings.database_hostname}:{settings.database_port}/{settings.database_name}_test'
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 
 TestingSessionLocal = sessionmaker(
     autocommit=False, autoflush=False, bind=engine)
-
-Base = declarative_base()
 
 
 @pytest.fixture()
