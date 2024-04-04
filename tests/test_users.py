@@ -1,25 +1,8 @@
 import pytest
-
 from jose import jwt
 
 from app.config import settings
 from app.schemas import user as user_schemas, auth as auth_schemas
-from .database import client, session
-
-
-@pytest.fixture(scope="module") # Мега сомнительный тестик хз
-def test_user(client):
-    user_credentials = {'email': 'test123@gmail.com', 'password': 'test123', 'username': 'test123'}
-    res = client.post('/users', json=user_credentials)
-
-    new_user = res.json()
-
-    new_user['password'] = user_credentials['password']
-    new_user['email'] = user_credentials['email']
-
-    assert res.status_code == 201
-
-    return new_user
 
 
 def test_root(client):
@@ -44,3 +27,15 @@ def test_login_user(client, test_user):
     id = payload.get('id')
     assert res.status_code == 200
     assert token_res.token_type == 'bearer'
+
+
+@pytest.mark.parametrize("email, password, status_code", [
+    ('wrongemail@gmail.com', 'test123', 403),
+    ('test123@gmail.com', 'wrongpassword', 403),
+    ('wrongemail@gmail.com', 'wrongpassword', 403),
+    (None, 'test123', 422),
+    ('test123@gmail.com', None, 422)
+])
+def test_incorrect_login_user(client, test_user, email, password, status_code):
+    res = client.post('/login', data={"username": email, "password": password})
+    assert res.status_code == status_code
