@@ -107,7 +107,8 @@ def test_messages(client, test_user, session):
     def create_message_model(message):  # Словарь с данными для одной записки -> модель записки
         return models.Message(**message)
 
-    message_map = map(create_message_model, messages_data) # Преобразуем список из словарей данных для сообщений в список моделей
+    message_map = map(create_message_model,
+                      messages_data)  # Преобразуем список из словарей данных для сообщений в список моделей
     messages = list(message_map)
 
     session.add_all(messages)
@@ -115,3 +116,17 @@ def test_messages(client, test_user, session):
 
     messages = session.query(models.Message).all()
     return messages
+
+
+def test_message(client, test_user, session):
+    message_data = {'title': 'Test Message', 'content': 'Test', 'creator_id': test_user['id'],
+                    'receiver_id': test_user['id']}
+
+    message = models.Message(**message_data)
+
+    session.add(message)
+    session.commit()
+
+    message = session.query(models.Message).first()
+    return message
+

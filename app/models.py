@@ -36,5 +36,6 @@ class Message(Base):
         nullable=False,
     )
 
+    # Сообщение узнает о авторе и адрессанте через ID которые вы указываете
     creator = relationship("User", foreign_keys=[creator_id])  # type: ignore
     receiver = relationship("User", foreign_keys=[receiver_id])  # type: ignore
