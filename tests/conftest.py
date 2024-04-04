@@ -2,6 +2,8 @@ from fastapi.testclient import TestClient
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+
+from app import models
 from app.main import app
 
 from app.config import settings
@@ -69,3 +71,46 @@ def authorized_client(client, token):
         'Authorization': f'Bearer {token["access_token"]}'
     }
     return client
+
+
+@pytest.fixture(scope='module')
+def test_messages(client, test_user, session):
+    messages_data = [  # Данные для создания сообщений
+        {
+            'title': 'Test Message',
+            'content': 'Я рот ебал осмаловской',
+            'creator_id': test_user['id'],
+            'receiver_id': test_user['id']
+        },
+        {
+            'title': 'Test Message',
+            'content': 'Я рот ебал осмаловской',
+            'creator_id': test_user['id'],
+            'receiver_id': test_user['id']
+        },
+        {
+            'title': 'Test Message',
+            'content': 'Я рот ебал осмаловской',
+            'creator_id': test_user['id'],
+            'receiver_id': test_user['id']
+        },
+        {
+            'title': 'Test Message',
+            'content': 'Я рот ебал осмаловской',
+            'creator_id': test_user['id'],
+            'receiver_id': test_user['id']
+        }
+    ]
+
+    def create_message_model(message):  # Словарь с данными для одной записки -> модель записки
+        return models.Message(**message)
+
+    message_map = map(create_message_model, messages_data) # Преобразуем список из словарей данных для сообщений в список моделей
+    messages = list(message_map)
+
+    session.add_all(messages)
+    session.commit()
+
+    messages = session.query(models.Message).all()
+
+    return messages
