@@ -6,6 +6,8 @@ from sqlalchemy.orm import sessionmaker
 from app import models
 from app.main import app
 
+from app.schemas import message as message_schemas
+
 from app.config import settings
 from app.database import get_db
 from app.database import Base
@@ -112,5 +114,4 @@ def test_messages(client, test_user, session):
     session.commit()
 
     messages = session.query(models.Message).all()
-
     return messages

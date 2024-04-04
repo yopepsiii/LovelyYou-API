@@ -13,7 +13,8 @@ router = APIRouter(tags=["messages"])
 
 
 @router.get(
-    "/messages"
+    "/messages",
+    response_model=list[message_schemas.Message]
 )  # Get all messages
 async def get_messages(
         db: Session = Depends(get_db),
