@@ -66,13 +66,14 @@ def token(client, test_user):
     return token
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture()
 def authorized_client(client, token):
-    client.headers = {
-        **client.headers,
+    new_client = client
+    new_client.headers = {
+        **new_client.headers,
         'Authorization': f'Bearer {token["access_token"]}'
     }
-    return client
+    return new_client
 
 
 @pytest.fixture(scope='module')
@@ -116,17 +117,4 @@ def test_messages(client, test_user, session):
 
     messages = session.query(models.Message).all()
     return messages
-
-
-def test_message(client, test_user, session):
-    message_data = {'title': 'Test Message', 'content': 'Test', 'creator_id': test_user['id'],
-                    'receiver_id': test_user['id']}
-
-    message = models.Message(**message_data)
-
-    session.add(message)
-    session.commit()
-
-    message = session.query(models.Message).first()
-    return message
 
