@@ -20,7 +20,7 @@ TestingSessionLocal = sessionmaker(
     autocommit=False, autoflush=False, bind=engine)
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture
 def session():
     Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
@@ -31,7 +31,7 @@ def session():
         db.close()
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture
 def client(session):
     def override_get_db():
 
@@ -44,7 +44,7 @@ def client(session):
     yield TestClient(app)
 
 
-@pytest.fixture(scope="module")  # Мега сомнительная фикстура хз
+@pytest.fixture
 def test_user(client):
     user_credentials = {'email': 'test123@gmail.com', 'password': 'test123', 'username': 'bebrta'}
     res = client.post('/users', json=user_credentials)
@@ -59,15 +59,30 @@ def test_user(client):
     return new_user
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture
+def test_user2(client):
+    user_credentials = {'email': 'test345@gmail.com', 'password': 'test345', 'username': 'bebrta2'}
+    res = client.post('/users', json=user_credentials)
+
+    new_user = res.json()
+
+    new_user['password'] = user_credentials['password']
+    new_user['email'] = user_credentials['email']
+
+    assert res.status_code == 201
+
+    return new_user
+
+
+@pytest.fixture
 def token(client, test_user):
     res = client.post('/login', data={'username': test_user['email'], 'password': test_user['password']})
     token = res.json()
     return token
 
 
-@pytest.fixture()
-def authorized_client(client, token):
+@pytest.fixture
+def authorized_client(client, token):  # Мы всегда залогинены от test_user
     new_client = client
     new_client.headers = {
         **new_client.headers,
@@ -76,31 +91,31 @@ def authorized_client(client, token):
     return new_client
 
 
-@pytest.fixture(scope='module')
-def test_messages(client, test_user, session):
+@pytest.fixture
+def test_messages(client, test_user, test_user2, session):
     messages_data = [  # Данные для создания сообщений
         {
             'title': 'Test Message',
             'content': 'Я рот ебал осмаловской',
             'creator_id': test_user['id'],
-            'receiver_id': test_user['id']
+            'receiver_id': test_user2['id']
         },
         {
             'title': 'Test Message',
             'content': 'Я рот ебал осмаловской',
             'creator_id': test_user['id'],
+            'receiver_id': test_user2['id']
+        },
+        {
+            'title': 'Test Message',
+            'content': 'Я рот ебал осмаловской',
+            'creator_id': test_user2['id'],
             'receiver_id': test_user['id']
         },
         {
             'title': 'Test Message',
             'content': 'Я рот ебал осмаловской',
-            'creator_id': test_user['id'],
-            'receiver_id': test_user['id']
-        },
-        {
-            'title': 'Test Message',
-            'content': 'Я рот ебал осмаловской',
-            'creator_id': test_user['id'],
+            'creator_id': test_user2['id'],
             'receiver_id': test_user['id']
         }
     ]
@@ -118,3 +133,10 @@ def test_messages(client, test_user, session):
     messages = session.query(models.Message).all()
     return messages
 
+
+@pytest.fixture
+def test_updated_data():
+    return {
+        "title": "updated title",
+        "content": "updated content"
+    }

@@ -27,8 +27,7 @@ async def get_messages(
         db.query(models.Message)
         .filter(
             (models.Message.title + models.Message.content).contains(search.lower()),  # type: ignore
-            models.Message.creator_id == user.id,  # type: ignore
-        )
+             )
         .limit(limit)
         .offset(skip)
         .all()
@@ -89,7 +88,7 @@ async def get_message(
         user: models.User = Depends(oauth2.get_current_user),
 ):
     message = db.query(models.Message).filter(models.Message.id == id).first()  # type: ignore
-    if not message:
+    if message is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=f"message {id} was not found"
         )
@@ -103,6 +102,7 @@ async def update_message(
         db: Session = Depends(get_db),
         user: models.User = Depends(oauth2.get_current_user),
 ):
+
     message_query = db.query(models.Message).filter(models.Message.id == id)  # type: ignore
     message = message_query.first()
 
@@ -110,6 +110,11 @@ async def update_message(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=f"message {id} was not found"
         )
+
+    if message.creator_id != user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Not authorized to delete message with ID {id}")
 
     message_query.update(updated_message.dict(), synchronize_session=False)
 
