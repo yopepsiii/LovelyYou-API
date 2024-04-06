@@ -7,6 +7,6 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Pull our code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4.1.1
       - name: Say hi to pepsik
         run: echo "Hello, Pepsik"
