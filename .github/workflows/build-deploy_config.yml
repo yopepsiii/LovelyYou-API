@@ -10,10 +10,10 @@ on:
 
 
 jobs:
-	job1:
-		runs-on: ubuntu-latest
-		steps:
-			- name: Pulling Git Repo
-			  uses: actions/checkout@v2
-			- name: say hi to user
-			  run: echo 'Hello, Pepsik'
+  job1:
+  	runs-on: ubuntu-latest
+  	steps:
+	  - name: Pulling Git Repo
+  	  uses: actions/checkout@v2
+	  - name: say hi to user
+  	  run: echo 'Hello, Pepsik'
