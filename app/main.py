@@ -29,4 +29,4 @@ app.include_router(auth.router)
 
 @app.get("/")
 async def root():
-    return {"message": "API is agdfgd"}
+    return {"message": "API is bebra"}
