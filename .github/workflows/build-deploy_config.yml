@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
   job1:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: Pull our code
         uses: actions/checkout@v2
