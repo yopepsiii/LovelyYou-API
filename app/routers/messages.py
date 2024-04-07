@@ -9,11 +9,11 @@ from app.database import get_db
 from .. import oauth2
 from ..schemas import message as message_schemas
 
-router = APIRouter(tags=["messages"])
+router = APIRouter(tags=["Messages"], prefix='/messages')
 
 
 @router.get(
-    "/messages",
+    "/",
     response_model=list[message_schemas.Message]
 )  # Get all messages
 async def get_messages(
@@ -37,7 +37,7 @@ async def get_messages(
 
 
 @router.get(
-    "/messages/me",
+    "/me",
     response_model=list[message_schemas.Message])  # Получаем все сообщения конкретно от авторизированного пользователя
 async def get_messages(
         db: Session = Depends(get_db),
@@ -61,7 +61,7 @@ async def get_messages(
 
 
 @router.post(
-    "/messages",
+    "/",
     status_code=status.HTTP_201_CREATED,
     response_model=message_schemas.Message,
 )  # Create a message
@@ -79,7 +79,7 @@ async def create_message(
 
 
 @router.get(
-    "/messages/{id}",
+    "/{id}",
     response_model=message_schemas.Message,
 )  # Get one message
 async def get_message(
@@ -95,7 +95,7 @@ async def get_message(
     return message
 
 
-@router.put("/messages/{id}")  # Update message
+@router.put("/{id}")  # Update message
 async def update_message(
         id: int,
         updated_message: message_schemas.MessageUpdate,
@@ -124,7 +124,7 @@ async def update_message(
     return message
 
 
-@router.delete("/messages/{id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_message(
         id: int,
         db: Session = Depends(get_db),

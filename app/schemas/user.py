@@ -24,4 +24,3 @@ class UserLogin(BaseModel):
 class UserOut(BaseModel):
     username: str
     id: int
-    created_at: datetime

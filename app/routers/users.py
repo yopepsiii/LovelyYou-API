@@ -1,8 +1,9 @@
 from fastapi import Depends, HTTPException, APIRouter
 from sqlalchemy.orm import Session
+from sqlalchemy.sql.functions import current_user
 from starlette import status
 
-from .. import models, utils
+from .. import models, utils, oauth2
 from ..schemas import user as user_schemas
 from ..database import get_db
 
@@ -36,3 +37,22 @@ async def create_user(user: user_schemas.UserCreate, db: Session = Depends(get_d
     db.refresh(new_user)
 
     return new_user
+
+
+@router.put("/{id}", response_model=user_schemas.UserUpdate)
+async def update_user(id: int, updated_user: user_schemas.UserUpdate, db: Session = Depends(get_db),
+                      current_user: models.User = Depends(oauth2.get_current_user)):
+    user_query = db.query(models.User).filter(models.User.id == id)  # type: ignore
+    user = user_query.first()
+
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'User with ID {id} is not exists')
+    if user.id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f'Not authorized to update user with ID {id}')
+
+    user_query.update(updated_user.dict(), synchronize_session=False)
+
+    db.commit()
+    db.refresh(user)
+
+    return user
