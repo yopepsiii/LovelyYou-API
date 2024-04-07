@@ -21,21 +21,7 @@ CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
 FROM nginx:latest AS nginx_base
 
 # Копируем конфигурационный файл Nginx в контейнер
-COPY nginx.conf /etc/nginx/nginx.conf
-
-# В настройках Nginx указываем проксирование запросов на наш Python-сервер
-# Например, если наше Python-приложение слушает порт 8000
-RUN echo "server { \
-    listen 80; \
-    location / { \
-        proxy_pass http://localhost:8000; \
-        proxy_http_version 1.1; \
-        proxy_set_header Upgrade \$http_upgrade; \
-        proxy_set_header Connection 'upgrade'; \
-        proxy_set_header Host \$host; \
-        proxy_cache_bypass \$http_upgrade; \
-    } \
-}" > /etc/nginx/default.conf
+COPY nginx.conf /etc/nginx/conf.d/
 
 # Определяем точку входа для Nginx
 ENTRYPOINT ["nginx", "-g", "daemon off;"]
