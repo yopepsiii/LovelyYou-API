@@ -10,7 +10,7 @@ services:
     image: postgres
     environment:
       - POSTGRES_PASSWORD=Monolit123
-      - POSTGRES_DB=LovelyYou
+      - POSTGRES_DB=LovelyYou_test
     volumes:
       - postgres-db:/var/lib/postgresql/data
 
