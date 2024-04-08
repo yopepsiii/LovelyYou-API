@@ -1,8 +1,6 @@
 services:
   api:
     image: yopepsi/lovely-you-api
-    ports:
-      - 8000:8000
     environment:
       - DATABASE_HOSTNAME=${DATABASE_HOSTNAME}
       - DATABASE_PORT=${DATABASE_PORT}
@@ -20,7 +18,7 @@ services:
     ports:
       - 80:80
     volumes:
-      - ./nginx:/etc/nginx/conf.d
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - [api]
   postgres:
