@@ -74,7 +74,17 @@ jobs:
     steps:
       - name: Checkout our code
         uses: actions/checkout@v4.1.1
-      - name: Deploy to Ubuntu
+#      - name: Deploy to Ubuntu
+#        uses: appleboy/ssh-action@master
+#        with:
+#          host: ${{secrets.PROD_HOST}}
+#          username: ${{secrets.PROD_USERNAME}}
+#          password: ${{secrets.PROD_PASSWORD}}
+#          script: |
+#            cd app/src
+#            git pull
+#            echo ${{secrets.PROD_PASSWORD}} | sudo -S systemctl restart api
+      - name: Composing docker images
         uses: appleboy/ssh-action@master
         with:
           host: ${{secrets.PROD_HOST}}
@@ -83,6 +93,6 @@ jobs:
           script: |
             cd app/src
             git pull
-            echo ${{secrets.PROD_PASSWORD}} | sudo -S systemctl restart api
+            docker compose docker-compose-prod.yml up -d
 
 
