@@ -93,7 +93,7 @@ jobs:
           script: |
             cd app/src
             git pull
-            docker compose -f docker-compose-prod.yml up -d
+#            docker compose -f docker-compose-prod.yml up -d
 
           # Remember that .env file must exist in ./
 
