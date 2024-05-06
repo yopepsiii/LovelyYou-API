@@ -13,6 +13,13 @@ services:
       - POSTGRES_DB=LovelyYou_test
     volumes:
       - postgres-db:/var/lib/postgresql/data
+  redis:
+    image: redis:latest
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    ports:
+      - 6379:6379
   api:
     build: .
     volumes:

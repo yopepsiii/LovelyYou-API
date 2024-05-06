@@ -9,6 +9,8 @@ from app.database import get_db
 from .. import oauth2
 from ..schemas import message as message_schemas
 
+from ..redis.tools import RedisTools
+
 router = APIRouter(tags=["Messages"], prefix='/messages')
 
 
@@ -27,7 +29,7 @@ async def get_messages(
         db.query(models.Message)
         .filter(
             (models.Message.title + models.Message.content).contains(search.lower()),  # type: ignore
-             )
+        )
         .limit(limit)
         .offset(skip)
         .all()
@@ -87,12 +89,15 @@ async def get_message(
         db: Session = Depends(get_db),
         user: models.User = Depends(oauth2.get_current_user),
 ):
-    message = db.query(models.Message).filter(models.Message.id == id).first()  # type: ignore
-    if message is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=f"message {id} was not found"
-        )
-    return message
+    if f'messages/{id}' not in [s.decode('utf-8') for s in RedisTools.get_keys()]:
+        message = db.query(models.Message).filter(models.Message.id == id).first()  # type: ignore
+        if message is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail=f"message {id} was not found"
+            )
+        RedisTools.set_pair(f'messages/{id}', message)
+
+    return RedisTools.get_pair(f'messages/{id}')
 
 
 @router.put("/{id}")  # Update message
@@ -102,7 +107,6 @@ async def update_message(
         db: Session = Depends(get_db),
         user: models.User = Depends(oauth2.get_current_user),
 ):
-
     message_query = db.query(models.Message).filter(models.Message.id == id)  # type: ignore
     message = message_query.first()
 
