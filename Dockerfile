@@ -1,6 +1,6 @@
 # Используем базовый образ Python для нашего приложения
 FROM python:3.12
-
+FROM redis
 # Устанавливаем рабочую директорию для Python приложения
 WORKDIR /usr/src/app
 
@@ -8,8 +8,7 @@ WORKDIR /usr/src/app
 COPY requirements.txt .
 
 # Устанавливаем необходимые зависимости
-RUN pip install --no-cache-dir -r requirements.txt
-
+CMD ["pip", "install", "--no-cache-dir", "-r", "requirements.txt"]
 # Копируем остальные файлы приложения
 COPY . .
 

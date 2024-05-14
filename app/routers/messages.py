@@ -11,19 +11,16 @@ from ..schemas import message as message_schemas
 
 from ..redis.tools import RedisTools
 
-router = APIRouter(tags=["Messages"], prefix='/messages')
+router = APIRouter(tags=["Messages"], prefix="/messages")
 
 
-@router.get(
-    "/",
-    response_model=list[message_schemas.Message]
-)  # Get all messages
+@router.get("/", response_model=list[message_schemas.Message])  # Get all messages
 async def get_messages(
-        db: Session = Depends(get_db),
-        user: models.User = Depends(oauth2.get_current_user),
-        limit: int = 10,
-        skip: int = 0,
-        search: Optional[str] = "",
+    db: Session = Depends(get_db),
+    user: models.User = Depends(oauth2.get_current_user),
+    limit: int = 10,
+    skip: int = 0,
+    search: Optional[str] = "",
 ):
     messages = (
         db.query(models.Message)
@@ -39,14 +36,14 @@ async def get_messages(
 
 
 @router.get(
-    "/me",
-    response_model=list[message_schemas.Message])  # Получаем все сообщения конкретно от авторизированного пользователя
+    "/me", response_model=list[message_schemas.Message]
+)  # Получаем все сообщения конкретно от авторизированного пользователя
 async def get_messages(
-        db: Session = Depends(get_db),
-        user: models.User = Depends(oauth2.get_current_user),
-        limit: int = 10,
-        skip: int = 0,
-        search: Optional[str] = "",
+    db: Session = Depends(get_db),
+    user: models.User = Depends(oauth2.get_current_user),
+    limit: int = 10,
+    skip: int = 0,
+    search: Optional[str] = "",
 ):
     messages = (
         db.query(models.Message)
@@ -68,9 +65,9 @@ async def get_messages(
     response_model=message_schemas.Message,
 )  # Create a message
 async def create_message(
-        message: message_schemas.MessageCreate,
-        db: Session = Depends(get_db),
-        user: models.User = Depends(oauth2.get_current_user),
+    message: message_schemas.MessageCreate,
+    db: Session = Depends(get_db),
+    user: models.User = Depends(oauth2.get_current_user),
 ):
     new_message = models.Message(creator_id=user.id, **message.dict())
     db.add(new_message)
@@ -80,32 +77,34 @@ async def create_message(
     return new_message
 
 
+
 @router.get(
     "/{id}",
     response_model=message_schemas.Message,
 )  # Get one message
 async def get_message(
-        id: int,
-        db: Session = Depends(get_db),
-        user: models.User = Depends(oauth2.get_current_user),
+    id: int,
+    db: Session = Depends(get_db),
+    user: models.User = Depends(oauth2.get_current_user),
 ):
-    if f'messages/{id}' not in [s.decode('utf-8') for s in RedisTools.get_keys()]:
+    if f"messages/{id}" not in [s.decode("utf-8") for s in RedisTools.get_keys()]:
         message = db.query(models.Message).filter(models.Message.id == id).first()  # type: ignore
         if message is None:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail=f"message {id} was not found"
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"message {id} was not found",
             )
-        RedisTools.set_pair(f'messages/{id}', message)
+        RedisTools.set_pair(f"messages/{id}", f"{message.dict }")
 
-    return RedisTools.get_pair(f'messages/{id}')
+    return RedisTools.get_pair(f"messages/{id}")
 
 
 @router.put("/{id}")  # Update message
 async def update_message(
-        id: int,
-        updated_message: message_schemas.MessageUpdate,
-        db: Session = Depends(get_db),
-        user: models.User = Depends(oauth2.get_current_user),
+    id: int,
+    updated_message: message_schemas.MessageUpdate,
+    db: Session = Depends(get_db),
+    user: models.User = Depends(oauth2.get_current_user),
 ):
     message_query = db.query(models.Message).filter(models.Message.id == id)  # type: ignore
     message = message_query.first()
@@ -118,7 +117,8 @@ async def update_message(
     if message.creator_id != user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail=f"Not authorized to delete message with ID {id}")
+            detail=f"Not authorized to delete message with ID {id}",
+        )
 
     message_query.update(updated_message.dict(), synchronize_session=False)
 
@@ -130,9 +130,9 @@ async def update_message(
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_message(
-        id: int,
-        db: Session = Depends(get_db),
-        user: models.User = Depends(oauth2.get_current_user),
+    id: int,
+    db: Session = Depends(get_db),
+    user: models.User = Depends(oauth2.get_current_user),
 ):
     message_query = db.query(models.Message).filter(models.Message.id == id)  # type: ignore
     message = message_query.first()
