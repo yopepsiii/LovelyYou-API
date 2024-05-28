@@ -1,4 +1,13 @@
 services:
+  api:
+    build: .
+    container_name: api
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    volumes:
+      - ./:/usr/src/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
   nginx:
     image: nginx:stable
     container_name: nginx
@@ -16,16 +25,11 @@ services:
   redis:
     image: redis:latest
     container_name: redis
-    environment:
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
     ports:
       - 6379:6379
-  api:
-    build: .
     volumes:
-      - ./:/usr/src/app:ro
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+      - redis-data:/data
 
 volumes:
   postgres-db:
+  redis-data:
