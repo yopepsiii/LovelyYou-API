@@ -63,7 +63,6 @@ async def get_messages(
 @router.post(
     "/",
     status_code=status.HTTP_201_CREATED,
-    response_model=message_schemas.Message,
 )  # Create a message
 async def create_message(
         message: message_schemas.MessageCreate,
@@ -80,13 +79,12 @@ async def create_message(
 
 @router.get(
     "/{id}",
-    response_model=message_schemas.Message
 )  # Get one message
 @cache(namespace="one_message")
 def get_message(
         id: int,
         db: Session = Depends(get_db)
-) -> models.Message:
+):
     message = db.query(models.Message).filter(models.Message.id == id).first()
     if message is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Message not found")

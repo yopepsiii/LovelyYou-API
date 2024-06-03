@@ -10,6 +10,8 @@ class Settings(BaseSettings):
     secret_key: str
     algorithm: str
     access_token_expire_minutes: int
+    domain_email: str
+    domain_url: str
 
     class Config:
         env_file = ".venv/.env"

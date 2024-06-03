@@ -1,11 +1,11 @@
 # Используем базовый образ Python для нашего приложения
 FROM python:3.12
+# Копируем файл requirements.txt
+COPY requirements.txt /usr/src/app/requirements.txt
 # Устанавливаем рабочую директорию для Python приложения
 WORKDIR /usr/src/app
-# Копируем файл requirements.txt
-COPY requirements.txt .
 # Устанавливаем необходимые зависимости
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install -r requirements.txt
 
 COPY . .
 

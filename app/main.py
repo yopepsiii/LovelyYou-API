@@ -47,7 +47,7 @@ async def root():
 
 @app.on_event("startup")
 async def startup():
-    pool = ConnectionPool.from_url(url="redis://localhost")
+    pool = ConnectionPool.from_url(url="redis://redis")
     r = redis.Redis(connection_pool=pool)
     FastAPICache.init(RedisBackend(r), prefix="lovely-you-cache", key_builder=api_key_builder)
 
