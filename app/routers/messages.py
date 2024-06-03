@@ -1,4 +1,3 @@
-import time
 from typing import Optional
 
 from fastapi import Depends, HTTPException, APIRouter
@@ -36,7 +35,8 @@ async def get_messages(
 
 
 @router.get(
-    "/me", response_model=list[message_schemas.Message]
+    "/me",
+    response_model=list[message_schemas.Message]
 )  # Получаем все сообщения конкретно от авторизированного пользователя
 @cache(expire=100)
 async def get_messages(
@@ -82,11 +82,11 @@ async def create_message(
     "/{id}",
     response_model=message_schemas.Message
 )  # Get one message
-@cache(expire=60)
+@cache(namespace="one_message")
 def get_message(
         id: int,
         db: Session = Depends(get_db)
-):
+) -> models.Message:
     message = db.query(models.Message).filter(models.Message.id == id).first()
     if message is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Message not found")
@@ -144,4 +144,3 @@ async def delete_message(
     message_query.delete(synchronize_session=False)
 
     db.commit()
-
