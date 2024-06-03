@@ -11,7 +11,7 @@ ORM - SQLAlchemy
 Миграции - Alembic  
 Валидация данных - Pydantic  
 
-Кэширование и нереляционная бд - Redis  
+Кэширование - Redis  
 
 Веб-сервер - Nginx  
 
