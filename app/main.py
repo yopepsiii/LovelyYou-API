@@ -17,16 +17,13 @@ from fastapi_cache.backends.redis import RedisBackend
 
 # models.Base.metadata.create_all(bind=engine)
 
-app = FastAPI()
+app = FastAPI(root_path='/api/v2')
 
 origins = [
-    "http://localhost",
-    "http://localhost:8000",
-    "https://localhost",
-    "https://localhost:8000",
-    "http://localhost:3000",
+    'http://192.168.31.122:3000',
+    'http://localhost:3000'
+    'http://localhost:80'
 ]
-
 app.add_middleware(
     CORSMiddleware,  # type: ignore
     allow_origins=origins,

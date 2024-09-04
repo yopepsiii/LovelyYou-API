@@ -1,6 +1,7 @@
 from typing import Optional
 
 from fastapi import Depends, HTTPException, APIRouter
+from fastapi_cache import FastAPICache
 from fastapi_cache.decorator import cache
 from sqlalchemy.orm import Session
 from starlette import status
@@ -33,13 +34,13 @@ async def get_messages(
 
     return messages
 
-
+# Все сообщения, созданные пользователем
 @router.get(
-    "/me",
+    "/by_me",
     response_model=list[message_schemas.Message]
-)  # Получаем все сообщения конкретно от авторизированного пользователя
+)
 @cache(expire=100)
-async def get_messages(
+async def get_messages_by_me(
         db: Session = Depends(get_db),
         user: models.User = Depends(oauth2.get_current_user),
         limit: int = 10,
@@ -51,6 +52,29 @@ async def get_messages(
         .filter(
             (models.Message.title + models.Message.content).contains(search.lower()),  # type: ignore
             models.Message.creator_id == user.id,  # type: ignore
+        )
+        .limit(limit)
+        .offset(skip)
+        .all()
+    )
+
+    return messages
+
+# Все сообщения, адресованные пользователю
+@router.get('/for_me', response_model=list[message_schemas.Message])
+@cache(expire=100)
+async def get_messages_for_me(
+        db: Session = Depends(get_db),
+        user: models.User = Depends(oauth2.get_current_user),
+        limit: int = 10,
+        skip: int = 0,
+        search: Optional[str] = "",
+):
+    messages = (
+        db.query(models.Message)
+        .filter(
+            (models.Message.title + models.Message.content).contains(search.lower()),  # type: ignore
+            models.Message.receiver_id == user.id,  # type: ignore
         )
         .limit(limit)
         .offset(skip)
@@ -74,6 +98,7 @@ async def create_message(
     db.commit()
     db.refresh(new_message)
 
+    await FastAPICache.clear()
     return new_message
 
 
@@ -117,6 +142,8 @@ async def update_message(
     db.commit()
     db.refresh(message)
 
+    await FastAPICache.clear()
+
     return message
 
 
@@ -140,5 +167,7 @@ async def delete_message(
             detail=f"Not authorized to delete message with ID {id}",
         )
     message_query.delete(synchronize_session=False)
+
+    await FastAPICache.clear()
 
     db.commit()

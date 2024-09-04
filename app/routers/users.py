@@ -1,10 +1,11 @@
 from fastapi import Depends, HTTPException, APIRouter
+from fastapi_cache import FastAPICache
 from sqlalchemy.orm import Session
-from sqlalchemy.sql.functions import current_user
 from starlette import status
 
 from .. import models, utils, oauth2
 from ..schemas import user as user_schemas
+from ..schemas import auth as auth_schemas
 from ..database import get_db
 
 router = APIRouter(tags=["Users"], prefix="/users")
@@ -27,7 +28,7 @@ async def get_user(id: int, db: Session = Depends(get_db)):
 
 
 @router.post(
-    "/", status_code=status.HTTP_201_CREATED, response_model=user_schemas.UserOut
+    "/", status_code=status.HTTP_201_CREATED, response_model=auth_schemas.Token
 )  # Create a user
 async def create_user(user: user_schemas.UserCreate, db: Session = Depends(get_db)):
     user.password = utils.hash(user.password)
@@ -36,7 +37,10 @@ async def create_user(user: user_schemas.UserCreate, db: Session = Depends(get_d
     db.commit()
     db.refresh(new_user)
 
-    return new_user
+    await FastAPICache.clear()
+
+    access_token = await oauth2.create_access_token(data={"user_id": new_user.id})
+    return {"access_token": access_token, "token_type": "bearer"}
 
 
 @router.put("/{id}", response_model=user_schemas.UserUpdate)
@@ -64,5 +68,7 @@ async def update_user(
 
     db.commit()
     db.refresh(user)
+
+    await FastAPICache.clear()
 
     return user
