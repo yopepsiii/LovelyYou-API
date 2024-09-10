@@ -1,6 +1,5 @@
 import hashlib
-from enum import Enum
-from typing import Optional, Callable
+from typing import Callable, Optional
 
 from fastapi import FastAPI
 from starlette.requests import Request

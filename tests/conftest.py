@@ -1,18 +1,16 @@
+from functools import wraps
+
 from fastapi.testclient import TestClient
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from app import models
-from app.main import app
-
-from app.schemas import message as message_schemas
-
 from app.config import settings
 from app.database import get_db
 from app.database import Base
 
-SQLALCHEMY_DATABASE_URL = f"postgresql://{settings.database_username}:{settings.database_password}@{settings.database_hostname}:{settings.database_port}/{settings.database_name}_test"
+SQLALCHEMY_DATABASE_URL = f"postgresql://{settings.database_username}:{settings.database_password}@{settings.database_hostname}:{settings.database_port}/{settings.database_name}-test"
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 
@@ -32,6 +30,7 @@ def session():
 
 @pytest.fixture
 def client(session):
+    from app.main import app
     def override_get_db():
 
         try:
@@ -131,7 +130,7 @@ def test_messages(client, test_user, test_user2, session):
     ]
 
     def create_message_model(
-        message,
+            message,
     ):  # Словарь с данными для одной записки -> модель записки
         return models.Message(**message)
 

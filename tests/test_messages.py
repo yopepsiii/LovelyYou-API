@@ -19,7 +19,7 @@ def test_get_all_messages(authorized_client, test_messages):
 
 
 def test_get_my_messages(authorized_client, test_messages):
-    res = authorized_client.get("/messages/me/")
+    res = authorized_client.get("/messages/for_me/")
 
     def validate(message):
         return message_schemas.Message(**message)

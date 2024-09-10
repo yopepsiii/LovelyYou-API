@@ -24,3 +24,8 @@ class UserLogin(BaseModel):
 class UserOut(BaseModel):
     username: str
     id: int
+
+
+class UserFullInfo(UserOut):
+    email: EmailStr
+    created_at: datetime

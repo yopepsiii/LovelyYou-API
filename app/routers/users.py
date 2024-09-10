@@ -12,13 +12,13 @@ router = APIRouter(tags=["Users"], prefix="/users")
 
 
 @router.get("/", response_model=list[user_schemas.UserOut])
-async def get_users(db: Session = Depends(get_db)):
+async def get_users(db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_user)):
     users = db.query(models.User).all()
     return users
 
 
-@router.get("/{id}", response_model=user_schemas.UserOut)
-async def get_user(id: int, db: Session = Depends(get_db)):
+@router.get("/{id}", response_model=user_schemas.UserFullInfo)
+async def get_user(id: int, db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_user)):
     user = db.query(models.User).filter(models.User.id == id).first()  # type: ignore
     if user is None:
         raise HTTPException(
@@ -28,7 +28,7 @@ async def get_user(id: int, db: Session = Depends(get_db)):
 
 
 @router.post(
-    "/", status_code=status.HTTP_201_CREATED, response_model=auth_schemas.Token
+    "/", status_code=status.HTTP_201_CREATED, response_model=user_schemas.UserOut
 )  # Create a user
 async def create_user(user: user_schemas.UserCreate, db: Session = Depends(get_db)):
     user.password = utils.hash(user.password)

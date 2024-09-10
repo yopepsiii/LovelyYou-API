@@ -3,6 +3,7 @@ from typing import Optional
 from fastapi import Depends, HTTPException, APIRouter
 from fastapi_cache import FastAPICache
 from fastapi_cache.decorator import cache
+
 from sqlalchemy.orm import Session
 from starlette import status
 
@@ -21,6 +22,7 @@ async def get_messages(
         limit: int = 10,
         skip: int = 0,
         search: Optional[str] = "",
+        user: models.User = Depends(oauth2.get_current_user)
 ):
     messages = (
         db.query(models.Message)
@@ -33,6 +35,7 @@ async def get_messages(
     )
 
     return messages
+
 
 # Все сообщения, созданные пользователем
 @router.get(
@@ -59,6 +62,7 @@ async def get_messages_by_me(
     )
 
     return messages
+
 
 # Все сообщения, адресованные пользователю
 @router.get('/for_me', response_model=list[message_schemas.Message])
@@ -108,7 +112,8 @@ async def create_message(
 @cache(namespace="one_message")
 def get_message(
         id: int,
-        db: Session = Depends(get_db)
+        db: Session = Depends(get_db),
+        user: models.User = Depends(oauth2.get_current_user)
 ):
     message = db.query(models.Message).filter(models.Message.id == id).first()
     if message is None:
